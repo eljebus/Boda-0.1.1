@@ -113,24 +113,58 @@ class PhotoHandler {
       }, 'image/jpeg', 0.9);
   }
 
-  downloadPhoto() {
+async downloadPhoto() {
+  try {
     const imgElement = document.querySelector('#modal-image');
     if (!imgElement || !imgElement.src) {
-      alert('No hay ninguna foto seleccionada para descargar.');
-      return;
+      throw new Error('No se puede encontrar la imagen');
     }
 
-    const url = imgElement.src;
-    const a = document.createElement('a');
-    a.href = url;
-    const timestamp = new Date().toISOString().replace(/[:.-]/g, '_');
-    a.download = `photo_${timestamp}.jpg`; // Genera el nombre del archivo con fecha y hora
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    // Configurar atributo crossOrigin
+    imgElement.crossOrigin = 'Anonymous';
+    
+    // Recargar la imagen con headers CORS
+    await new Promise((resolve, reject) => {
+      imgElement.onload = resolve;
+      imgElement.onerror = reject;
+      const src = imgElement.src;
+      imgElement.src = '';
+      imgElement.src = src;
+    });
+
+    // Crear canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = imgElement.naturalWidth;
+    canvas.height = imgElement.naturalHeight;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(imgElement, 0, 0);
+
+    // Generar nombre de archivo con formato personalizado
+    const fileName = this.generateCustomFileName(imgElement.src);
+
+    // Convertir a Blob y descargar
+    canvas.toBlob(blob => {
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }, 100);
+    }, 'image/jpeg', 0.92);
+
+  } catch (error) {
+    console.error('Error al descargar:', error);
+    this.directDownload(imgElement.src);
   }
-
-
+}
 
   openNativeCamera() {
       const fileInput = document.createElement('input');
