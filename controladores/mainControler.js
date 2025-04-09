@@ -96,7 +96,48 @@ exports.getDeseos = async (req, res) => {
     }
 };
 
+exports.album = async (req, res) => {
+    const fechaObjetivo = new Date('2024-06-07T16:30:00');
+    const ahora = new Date();
+    if (ahora < fechaObjetivo) {
+        return res.render('layout', {
+            title: 'Álbum',
+            content: 'album',
+            mensaje: 'Esta función estará disponible el día de nuestra boda'
+        });
+    }
+
+    try {
+        const result = await cloudinary.search
+            .expression('folder:Fotos')
+            .sort_by('created_at', 'desc')
+            .max_results(60)
+            .execute();
+
+        let fotos = result.resources.map(img => img.secure_url);
+
+        if (req.query.nueva && !fotos.includes(req.query.nueva)) {
+            fotos.unshift(req.query.nueva);
+        }
+
+        res.render('layout', { title: 'Álbum', content: 'album', fotos });
+    } catch (error) {
+        console.error('Error al obtener imágenes desde Cloudinary:', error);
+        res.status(500).send('Error cargando el álbum');
+    }
+};
+
 exports.textos = async (req, res) => {
+    const fechaObjetivo = new Date('2024-06-07T16:30:00');
+    const ahora = new Date();
+    if (ahora < fechaObjetivo) {
+        return res.render('layout', {
+            title: 'Textos',
+            content: 'textos',
+            mensaje: 'Esta función estará disponible el día de nuestra boda'
+        });
+    }
+
     try {
         const deseosPath = path.join(__dirname, '..', '/publicos/deseos.json');
         let deseos = [];
@@ -115,7 +156,7 @@ exports.textos = async (req, res) => {
         });
 
         res.render('layout', { 
-            title   : 'Alumno', 
+            title   : 'Textos', 
             content : 'textos',
             deseos  : deseos
         });
@@ -373,26 +414,6 @@ async function listarSuscriptores(req, res) {
     }
 }
 
-exports.album = async (req, res) => {
-    try {
-        const result = await cloudinary.search
-            .expression('folder:Fotos')
-            .sort_by('created_at', 'desc')
-            .max_results(60)
-            .execute();
-
-        let fotos = result.resources.map(img => img.secure_url);
-
-        if (req.query.nueva && !fotos.includes(req.query.nueva)) {
-            fotos.unshift(req.query.nueva);
-        }
-
-        res.render('layout', { title: 'Alumno', content: 'album', fotos });
-    } catch (error) {
-        console.error('Error al obtener imágenes desde Cloudinary:', error);
-        res.status(500).send('Error cargando el álbum');
-    }
-};
 // Función para verificar si una suscripción existe en el servidor
 exports.checkSubscription = async (req, res) => {
     try {
@@ -442,3 +463,11 @@ exports.notificaciones = async (req, res) => {
 };
 
 exports.listarSuscriptores = listarSuscriptores;
+
+// Nueva ruta para verificar la fecha
+exports.verificarFecha = (req, res) => {
+    const fechaObjetivo = new Date('2024-06-07T16:30:00');
+    const ahora = new Date();
+    const mostrarContenido = ahora >= fechaObjetivo;
+    res.json({ mostrarContenido });
+};
