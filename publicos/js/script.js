@@ -236,6 +236,9 @@ async downloadPhoto() {
         // 2. Verificación con SightEngine usando la imagen comprimida
         const isSafe = await this.checkWithSightEngine(compressedFile);
         if (!isSafe) {
+
+          if (loadingElement) loadingElement.style.display = 'none';
+          if (menuButton) menuButton.style.pointerEvents = 'block';
           throw new Error('La imagen no es apropiada para el álbum de boda');
         }
     
@@ -257,10 +260,7 @@ async downloadPhoto() {
       } catch (error) {
         console.error('Error:', error);
         alert(error.message);
-      } finally {
-        if (loadingElement) loadingElement.style.display = 'none';
-        if (menuButton) menuButton.style.pointerEvents = 'auto';
-      }
+      } 
     }
 
     
