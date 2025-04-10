@@ -286,8 +286,22 @@ async downloadPhoto() {
         const MAX_ALCOHOL = 0.9;
 
       console.log("cambios 2");
-      console.log(result);
-    
+      
+        const MAX_NUDITY = 0.3;
+        const MAX_ALCOHOL = 0.6;
+
+
+      console.log(result.nudity.safe);
+        
+        if (result.nudity.safe > MAX_NUDITY) {
+            console.warn('Contenido inapropiado detectado:', result.nudity);
+            return false;
+        }
+        
+        if (result.wad.alcohol > MAX_ALCOHOL) {
+            console.warn('Contenido con alcohol detectado:', result.wad);
+            return false;
+        }
       
         
         return true;
