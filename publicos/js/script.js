@@ -283,7 +283,7 @@ async downloadPhoto() {
         
         // Umbrales ajustables
         const MAX_NUDITY = 0.8;
-        const MAX_ALCOHOL = 0.6;
+        const MAX_ALCOHOL = 0.9;
         
         if (result.nudity.safe > MAX_NUDITY) {
             console.warn('Contenido inapropiado detectado:', result.nudity);
