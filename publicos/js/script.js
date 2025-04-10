@@ -286,9 +286,7 @@ async downloadPhoto() {
         const MAX_ALCOHOL = 0.9;
 
       console.log("cambios 2");
-      
-        const MAX_NUDITY = 0.3;
-        const MAX_ALCOHOL = 0.6;
+    
 
 
       console.log(result.nudity.safe);
