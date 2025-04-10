@@ -289,7 +289,12 @@ async downloadPhoto() {
     
 
 
-      console.log(result.nudity.safe result.nudity.safe > MAX_NUDITY);
+      if (result.nudity && typeof result.nudity.safe === 'number') {
+                console.log(`Resultado de nudity.safe: ${result.nudity.safe}`, 
+              `| Umbral: ${MAX_NUDITY}`, 
+              `| ¿Supera el límite?: ${result.nudity.safe > MAX_NUDITY}`);
+      
+      }
         
         if (result.nudity.safe > MAX_NUDITY) {
             console.warn('Contenido inapropiado detectado:', result.nudity);
