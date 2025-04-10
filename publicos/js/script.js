@@ -287,11 +287,7 @@ async downloadPhoto() {
 
       console.log("cambios 2");
       console.log(result);
-        
-        if (result.nudity.safe >0.8) {
-            console.warn('Contenido inapropiado detectado:', result.nudity);
-            return false;
-        }
+    
       
         
         return true;
