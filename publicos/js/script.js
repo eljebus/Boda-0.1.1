@@ -282,7 +282,7 @@ async downloadPhoto() {
         const result = await response.json();
         
         // Umbrales ajustables
-        const MAX_NUDITY = 0.3;
+        const MAX_NUDITY = 0.8;
         const MAX_ALCOHOL = 0.6;
         
         if (result.nudity.safe > MAX_NUDITY) {
