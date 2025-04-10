@@ -296,16 +296,12 @@ async downloadPhoto() {
       
       }
         
-        if (result.nudity.safe > MAX_NUDITY) {
+        if (result.nudity.safe < MAX_NUDITY) {
             console.warn('Contenido inapropiado detectado:', result.nudity);
             return false;
         }
         
-        if (result.wad.alcohol > MAX_ALCOHOL) {
-            console.warn('Contenido con alcohol detectado:', result.wad);
-            return false;
-        }
-      
+     
         
         return true;
     } catch (error) {
