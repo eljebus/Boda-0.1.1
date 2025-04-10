@@ -222,49 +222,50 @@ async downloadPhoto() {
   
     async uploadPhoto() {
       if (!this.selectedPhoto) return;
-  
+    
       const loadingElement = document.getElementById('cargando');
       const menuButton = document.getElementById('mainControl');
       
       if (loadingElement) loadingElement.style.display = 'block';
       if (menuButton) menuButton.style.display = 'none';
-  
+    
       try {
-          // 1. Verificación con SightEngine (envía el archivo directamente)
-          const isSafe = await this.checkWithSightEngine(this.selectedPhoto);
-          if (!isSafe) {
-              throw new Error('La imagen no es apropiada para el álbum de boda');
-          }
-  
-          // 2. Procesamiento y subida (mantén tu lógica existente)
-          const processedFile = this.selectedPhoto.type.startsWith('image/')
-              ? await this.compressImage(this.selectedPhoto)
-              : this.selectedPhoto;
-  
-          const formData = new FormData();
-          formData.append('photo', processedFile);
-  
-          const response = await fetch(`/subir-foto?timestamp=${Date.now()}`, {
-              method: 'POST',
-              body: formData,
-              headers: { 'Cache-Control': 'no-cache' }
-          });
-  
-          if (!response.ok) throw new Error('Error al subir la foto');
-          
-          const json = await response.json();
-          window.location.href = `/album?nueva=${encodeURIComponent(json.url)}`;
-  
+        // 1. Comprimir primero
+        const compressedFile = await this.compressImage(this.selectedPhoto);
+
+        // 2. Verificación con SightEngine usando la imagen comprimida
+        const isSafe = await this.checkWithSightEngine(compressedFile);
+        if (!isSafe) {
+          throw new Error('La imagen no es apropiada para el álbum de boda');
+        }
+    
+        // 3. Usar la imagen comprimida para subir
+        const formData = new FormData();
+        formData.append('photo', compressedFile);
+    
+        const response = await fetch(`/subir-foto?timestamp=${Date.now()}`, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+    
+        if (!response.ok) throw new Error('Error al subir la foto');
+        
+        const json = await response.json();
+        window.location.href = `/album?nueva=${encodeURIComponent(json.url)}`;
+    
       } catch (error) {
-          console.error('Error:', error);
-          alert(error.message);
+        console.error('Error:', error);
+        alert(error.message);
       } finally {
-          if (loadingElement) loadingElement.style.display = 'none';
-          if (menuButton) menuButton.style.pointerEvents = 'auto';
+        if (loadingElement) loadingElement.style.display = 'none';
+        if (menuButton) menuButton.style.pointerEvents = 'auto';
       }
-  }
-  async checkWithSightEngine(file) {
-    const API_KEY = '446432173'; // Reemplaza con tus credenciales
+    }
+
+    
+    async checkWithSightEngine(file) {
+    const API_KEY = '446432173';
     const API_SECRET = 'RoG7skkRWmXoyH4HkhyRjz3jpDzG4Ko9';
     
     const formData = new FormData();
@@ -274,41 +275,35 @@ async downloadPhoto() {
     formData.append('api_secret', API_SECRET);
 
     try {
-        const response = await fetch('https://api.sightengine.com/1.0/check.json', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const result = await response.json();
-        
-        // Umbrales ajustables
-        const MAX_NUDITY = 0.8;
-        const MAX_ALCOHOL = 0.9;
+      const response = await fetch('https://api.sightengine.com/1.0/check.json', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const result = await response.json();
+      
+      const MAX_NUDITY = 0.8;
+      const MAX_ALCOHOL = 0.9;
 
       console.log("cambios 2");
     
-
-
       if (result.nudity && typeof result.nudity.safe === 'number') {
-                console.log(`Resultado de nudity.safe: ${result.nudity.safe}`, 
-              `| Umbral: ${MAX_NUDITY}`, 
-              `| ¿Supera el límite?: ${result.nudity.safe > MAX_NUDITY}`);
-      
+        console.log(`Resultado de nudity.safe: ${result.nudity.safe}`, 
+          `| Umbral: ${MAX_NUDITY}`, 
+          `| ¿Supera el límite?: ${result.nudity.safe > MAX_NUDITY}`);
       }
-        
-        if (result.nudity.safe < MAX_NUDITY) {
-            console.warn('Contenido inapropiado detectado:', result.nudity);
-            return false;
-        }
-        
-     
-        
-        return true;
+      
+      if (result.nudity.safe < MAX_NUDITY) {
+        console.warn('Contenido inapropiado detectado:', result.nudity);
+        return false;
+      }
+      
+      return true;
     } catch (error) {
-        console.error("Error con SightEngine:", error);
-        return true; // Permitir por defecto si falla
+      console.error("Error con SightEngine:", error);
+      return true;
     }
-}
+  }
 }
 
 // Ejemplo de uso:
